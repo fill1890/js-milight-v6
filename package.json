@@ -1,0 +1,22 @@
+{
+  "name": "js-milight-v6",
+  "version": "1.0.0-dev",
+  "description": "",
+  "main": "src/milight.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fill1890/js-milight-v6.git"
+  },
+  "author": "fill1890",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fill1890/js-milight-v6/issues"
+  },
+  "homepage": "https://github.com/fill1890/js-milight-v6#readme"
+}
