@@ -37,27 +37,27 @@ const Queue = {
      * @param msg: Message to send
      * @param id: Optional id, used in transmission callback
      */
-    push: (msg) => {
-        messages.push(msg)
+    push: function(msg) {
+        this.messages.push(msg)
         if(typeof this.timeout === 'undefined') {
             this.shift()
         }
-    }
+    },
 
     /*
      * shift(): Timeout handler for sending messages
      *
      * Should only be used internally
      */
-    shift: () => {
-        this.send_msg(this.messages.shift())
-
+    shift: function() {
         if(this.messages.length > 0) {
+            this.send_msg(this.messages.shift())
+
             this.timeout = setTimeout(this.shift.bind(this), this.interval)
         } else {
             this.timeout = undefined
         }
-    }
+    },
 
     /*
      * send_msg: Send a message
@@ -66,39 +66,41 @@ const Queue = {
      *
      * Should only be used internally
      */
-    send_msg: (msg) => {
+    send_msg: function(msg) {
         clearInterval(this.ka_timer)
         this.transmit(msg.msg)
-        
+
         // This feels wrong but I don't know a better way to do it
-        if(msg.hasOwnProperty('id') && this.hasOwnProperty(transmit_callback)) {
+        if(msg.hasOwnProperty('id') && this.hasOwnProperty('transmit_callback')) {
             this.transmit_callback(msg.id)
-        } else if(this.hasOwnProperty(transmit_callback))
+        } else if(this.hasOwnProperty('transmit_callback')) {
             this.transmit_callback()
         }
 
         if(this.ka_msg !== '') {
             this.ka_timer = setInterval(this.send_ka.bind(this), this.ka_interval)
         }
-    }
+    },
 
     /*
      * send_ka: Send a keepalive
      *
      * Should only be used internally
      */
-    send_ka: () => { this.send_msg({msg: this.ka_msg, id: -1}) }
+    send_ka: function() {
+        this.send_msg({msg: this.ka_msg, id: -1})
+    },
 
     /*
      * stop(): Stop the queue
      */
-    stop: () => {
+    stop: function() {
         clearTimeout(this.timeout)
         clearInterval(this.ka_timer)
     }
 }
 
-/* 
+/*
  * createQueue(props)
  *
  * Create and start a new queue with properties as following Queue
