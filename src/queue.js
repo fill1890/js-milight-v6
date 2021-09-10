@@ -1,41 +1,48 @@
-/*
-Provides an automated transmission queue with optional keep-alive transmission at intervals
+/**
+ * Options for the queue
+ * @typedef {Object} QueueOptions
+ * @property {Function} transmit Function to call for transmission
+ * @property {Function} [transmit_callback] Callback after transmission
+ * @property {number} [interval=75] Interval between transmissions (ms)
+ * @property {number} [ka_interval=5000] Interval between keep-alive transmissions (ms)
+ * @property {string} [ka_msg] Message to send for keep-alive, disabled if none present
+ */
 
-Initialising:
-
-`Queue.createQueue({props})`
-
-Returns a new queue with given properties, as follows:
-
-`interval`: Interval between transmissions, defaults to 75ms
-`ka_interval`: Interval between keep-alive transmissions, defaults to 5s
-`ka_msg`: Message to send for keep-alive; disabled if not provided
-`transmit`: Function to call for transmission
-`transmit_callback`: Callback after transmission (optional)
-
-Add messages to the queue using `queue.push({msg: message[, id: id]})`
-Stop the queue with `queue.stop()`. Note this should be done for stopping keep-alive
-
-Any messages in the queue will be fired every `interval`
-Keep-alive messages will be fired after `ka_interval` with no other transmissions
-Keep-alive messages are disabled if `ka_msg` is not provided
-Will call `transmit(message)` to transmit a message
-Will call `transmit_callback([id])` upon transmission. `id` will be sent if given, will be -1 for keep-alive
-*/
-
+/**
+ * Provides an automated transmission queue with optional keep-alive transmission at intervals.
+ * 
+ * Any messages in the queue will be fired every `interval`
+ * Keep-alive messages will be fired after `ka_interval` with no other transmissions
+ * Keep-alive messages are disabled if `ka_msg` is not provided
+ * Will call `transmit(message)` to transmit a message
+ * Will call `transmit_callback([id])` upon transmission. `id` will be sent if given, will be -1 for keep-alive
+ * 
+ * @name Queue
+ * @extends {QueueOptions}
+ */
 const Queue = {
-    // Message queue
+    /**
+     * A message
+     * @typedef {Object} Message
+     * @property {string} msg The message content
+     * @property {*} [id] The message id, used in transmission callback
+     */
+
+    /**
+     * Queue of messages to send
+     * @type {Array<Message>}
+     * @name Queue#message
+     */
     messages: [],
+
     timeout: undefined,
     interval: 75,
     ka_interval: 5000,
     ka_msg: '',
 
-    /*
-     * push({message: msg[, id: id]}): Add a message to the queue
-     *
-     * @param msg: Message to send
-     * @param id: Optional id, used in transmission callback
+    /**
+     * Add a message to the queue for transmission
+     * @param {Message} msg New message
      */
     push: function(msg) {
         this.messages.push(msg)
@@ -44,10 +51,9 @@ const Queue = {
         }
     },
 
-    /*
-     * shift(): Timeout handler for sending messages
-     *
-     * Should only be used internally
+    /**
+     * Timeout handler for sending messages
+     * @private
      */
     shift: function() {
         if(this.messages.length > 0) {
@@ -59,12 +65,10 @@ const Queue = {
         }
     },
 
-    /*
-     * send_msg: Send a message
-     *
-     * @param msg: Message to send in form of {msg: message[, id: id]}
-     *
-     * Should only be used internally
+    /**
+     * Function to send a message
+     * @param {Message} msg The message to send
+     * @private
      */
     send_msg: function(msg) {
         clearInterval(this.ka_timer)
@@ -82,17 +86,16 @@ const Queue = {
         }
     },
 
-    /*
-     * send_ka: Send a keepalive
-     *
-     * Should only be used internally
+    /**
+     * Function to send a keepalive message
+     * @private
      */
     send_ka: function() {
         this.send_msg({msg: this.ka_msg, id: -1})
     },
 
-    /*
-     * stop(): Stop the queue
+    /**
+     * Stop the queue, including the keepalive
      */
     stop: function() {
         clearTimeout(this.timeout)
@@ -100,14 +103,12 @@ const Queue = {
     }
 }
 
-/*
- * createQueue(props)
- *
- * Create and start a new queue with properties as following Queue
- *
- * Required: transmit callback to transmit message
+/**
+ * Create and start a new queue
+ * @param {QueueOptions} props The properties for the queue
+ * @returns Queue
  */
-createQueue = (props) => {
+function createQueue(props) {
     let queue = Object.assign(Object.create(Queue), props)
 
     if(queue.ka_msg !== '')
@@ -116,6 +117,4 @@ createQueue = (props) => {
     return queue
 }
 
-module.exports = {
-    createQueue: createQueue
-}
+module.exports = { createQueue }
